@@ -1,5 +1,6 @@
 package com.ilfalsodemetrio;
 
+import com.ilfalsodemetrio.bots.IlfalsodemetrioBot;
 import com.ilfalsodemetrio.bots.MariangiongiangelaBot;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
@@ -13,7 +14,7 @@ public class BotsStartup {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
         try {
             telegramBotsApi.registerBot(new MariangiongiangelaBot());
-            //telegramBotsApi.registerBot(new IlfalsodemetrioBot());
+            telegramBotsApi.registerBot(new IlfalsodemetrioBot());
         } catch (TelegramApiException e) {
             System.out.println("Bot crash: "+e.getMessage());
             e.printStackTrace();
