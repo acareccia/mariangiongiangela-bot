@@ -75,7 +75,10 @@ public abstract class Bot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         final Properties properties = loadResource(TELEGRAM_TOKENS);
-        return properties.getProperty(getBotUsername());
+        String token_prop = properties.getProperty(getBotUsername());
+        if (token_prop.startsWith("$"))
+            return System.getenv(token_prop.substring(1));
+        return token_prop;
     }
 
     public Message sendMsg(String id, String text) {
