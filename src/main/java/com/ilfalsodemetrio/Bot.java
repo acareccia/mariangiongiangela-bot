@@ -3,7 +3,6 @@ package com.ilfalsodemetrio;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -49,12 +48,20 @@ public abstract class Bot extends TelegramLongPollingBot {
         }
 
         log("load objects ...");
-        load();
+        try {
+            users = (Set<ChatUser>) PersistUtils.loadObject(getBotUsername()+".out");
+        } catch (Exception e) {
+            log("error :"+e);
+        }
     }
 
     public void shutdown() {
         log("save objects ...");
-        save();
+        try {
+            PersistUtils.persistObject(getBotUsername()+".out",users);
+        } catch (Exception e) {
+            log("error :"+e);
+        }
     }
 
     @Override
@@ -242,47 +249,4 @@ public abstract class Bot extends TelegramLongPollingBot {
         return users;
     }
 
-    public void save() {
-        try
-        {
-            final FileOutputStream fo = new FileOutputStream(getBotUsername()+".out");
-            final ObjectOutputStream oos = new ObjectOutputStream(fo);
-            oos.writeObject(users);
-            oos.flush();
-            oos.close();
-        }
-        catch (Exception ex)
-        {
-            log("save error :"+ex);
-            ex.printStackTrace();
-        }
-    }
-
-    public void load() {
-        try
-        {
-            final FileInputStream fis = new FileInputStream(getBotUsername()+".out");
-            final ObjectInputStream ois = new ObjectInputStream(fis);
-            final Object deserializedObject = ois.readObject();
-
-            log("Object Type to deserialize " + deserializedObject.getClass().getName());
-
-            if (deserializedObject instanceof Set)
-            {
-                users = (Set<ChatUser>) deserializedObject;
-            } else {
-                log("Not expected to deserialize " + deserializedObject.getClass().getName());
-            }
-            ois.close();
-
-            if (users != null)
-            {
-                log("The persisted obj are: " + users);
-            }
-        }
-        catch (Exception ex)
-        {
-            log("load error :"+ex);
-        }
-    }
 }
