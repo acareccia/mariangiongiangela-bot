@@ -33,7 +33,7 @@ public class MariangiongiangelaBot extends Bot {
             if (hasKeyword(text,keywords.get("names"),keywords.get("wiki"))) {
                 //fixme:
                 String term = message.getText().split(" ",3)[2];
-                return MariangelizeHandler.process(WikipediaHandler.process(term,"it",randomResponse(message,responses.get("greetings"))));
+                return MariangelizeHandler.process(WikipediaHandler.process(term,"it",randomResponse(message,responses.get("wiki"))));
             }
 
             if (hasKeyword(text, keywords.get("names"),keywords.get("kicks")))
