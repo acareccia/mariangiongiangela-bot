@@ -20,11 +20,13 @@ public class IlfalsodemetrioBot extends Bot {
             String text = message.getText();
 
             if (text.startsWith(INFO_COMMAND))
-                return getBotUsername()+" is live";
+                return getBotUsername()+" is live with "+getUsers(message.getChat());
 
             if (text.startsWith(HELP_COMMAND))
                 return HELP_COMMAND_TEXT;
 
+            if (hasKeyword(text,keywords.get("names")))
+                return randomResponse(message,responses.get("names"),getUsers(message.getChat()));
 
         }
         return null;

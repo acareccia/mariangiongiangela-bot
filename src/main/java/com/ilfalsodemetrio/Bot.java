@@ -2,6 +2,7 @@ package com.ilfalsodemetrio;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -14,8 +15,7 @@ import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.*;
@@ -35,6 +35,7 @@ public abstract class Bot extends TelegramLongPollingBot {
 
     public Bot() {
         log("startup ...");
+        log("load props ...");
         Properties props = loadResource(getBotUsername()+".properties");
 
         for(Map.Entry<Object, Object> p : props.entrySet()) {
@@ -46,6 +47,14 @@ public abstract class Bot extends TelegramLongPollingBot {
             else if (key.endsWith("_responses"))
                 responses.put(key.split("_",2)[0],values);
         }
+
+        log("load objects ...");
+        load();
+    }
+
+    public void shutdown() {
+        log("save objects ...");
+        save();
     }
 
     @Override
@@ -173,11 +182,12 @@ public abstract class Bot extends TelegramLongPollingBot {
         log("search :"+term);
 
         String output = "";
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        CloseableHttpClient httpClient =
+                HttpClientBuilder.create().build();
 
         try {
             String param = URLEncoder.encode(term.trim().toLowerCase(), "utf-8");
-            HttpPost request = new HttpPost(ENDPOINT+"?action=opensearch&limit=1&search="+param);
+            HttpGet request = new HttpGet(ENDPOINT+"?action=opensearch&limit=1&search="+param);
             request.addHeader("content-type", "application/x-www-form-urlencoded");
             CloseableHttpResponse response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
@@ -230,5 +240,49 @@ public abstract class Bot extends TelegramLongPollingBot {
     public Set<ChatUser> getUsers(Chat chat) {
         //fixme: filter
         return users;
+    }
+
+    public void save() {
+        try
+        {
+            final FileOutputStream fo = new FileOutputStream(getBotUsername()+".out");
+            final ObjectOutputStream oos = new ObjectOutputStream(fo);
+            oos.writeObject(users);
+            oos.flush();
+            oos.close();
+        }
+        catch (Exception ex)
+        {
+            log("save error :"+ex);
+            ex.printStackTrace();
+        }
+    }
+
+    public void load() {
+        try
+        {
+            final FileInputStream fis = new FileInputStream(getBotUsername()+".out");
+            final ObjectInputStream ois = new ObjectInputStream(fis);
+            final Object deserializedObject = ois.readObject();
+
+            log("Object Type to deserialize " + deserializedObject.getClass().getName());
+
+            if (deserializedObject instanceof Set)
+            {
+                users = (Set<ChatUser>) deserializedObject;
+            } else {
+                log("Not expected to deserialize " + deserializedObject.getClass().getName());
+            }
+            ois.close();
+
+            if (users != null)
+            {
+                log("The persisted obj are: " + users);
+            }
+        }
+        catch (Exception ex)
+        {
+            log("load error :"+ex);
+        }
     }
 }

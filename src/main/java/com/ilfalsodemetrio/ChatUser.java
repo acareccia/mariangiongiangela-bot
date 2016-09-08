@@ -3,10 +3,14 @@ package com.ilfalsodemetrio;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 /**
  * Created by lbrtz on 07/09/16.
  */
-public class ChatUser implements Comparable {
+public class ChatUser implements Comparable,Serializable {
 
     private Chat chat;
     private User user;
