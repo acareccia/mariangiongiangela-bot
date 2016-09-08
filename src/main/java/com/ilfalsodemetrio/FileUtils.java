@@ -19,7 +19,7 @@ public class FileUtils {
         return properties;
     }
     public static void persistObject(String filename,Object object) throws Exception {
-        final FileOutputStream fo = new FileOutputStream(filename);
+        final FileOutputStream fo = new FileOutputStream("/tmp/"+filename);
         final ObjectOutputStream oos = new ObjectOutputStream(fo);
         oos.writeObject(object);
         oos.flush();
@@ -27,7 +27,7 @@ public class FileUtils {
     }
 
     public static Object loadObject(String filename) throws Exception {
-        final FileInputStream fis = new FileInputStream(filename);
+        final FileInputStream fis = new FileInputStream("/tmp/"+filename);
         final ObjectInputStream ois = new ObjectInputStream(fis);
         final Object deserializedObject = ois.readObject();
 
