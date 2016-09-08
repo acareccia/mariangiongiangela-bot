@@ -1,6 +1,8 @@
 package com.ilfalsodemetrio.bots;
 
 import com.ilfalsodemetrio.Bot;
+import com.ilfalsodemetrio.dai.MariangelizeHandler;
+import com.ilfalsodemetrio.dai.WikipediaHandler;
 import org.telegram.telegrambots.api.objects.Message;
 
 import java.util.*;
@@ -19,16 +21,19 @@ public class MariangiongiangelaBot extends Bot {
         if (message.hasText()) {
             String text = message.getText();
 
+            // commands
             if (text.startsWith(INFO_COMMAND))
                 return getBotUsername()+" is live with "+getUsers(message.getChat());
 
             if (text.startsWith(HELP_COMMAND))
                 return HELP_COMMAND_TEXT;
 
+            // keywords
+
             if (hasKeyword(text,keywords.get("names"),keywords.get("wiki"))) {
                 //fixme:
                 String term = message.getText().split(" ",3)[2];
-                return mariangelize(searchWiki(term,"it"));
+                return MariangelizeHandler.process(WikipediaHandler.process(term,"it",randomResponse(message,responses.get("greetings"))));
             }
 
             if (hasKeyword(text, keywords.get("names"),keywords.get("kicks")))
@@ -44,44 +49,6 @@ public class MariangiongiangelaBot extends Bot {
 
         return null;
     }
-
-    protected String mariangelize(String text) {
-        StringTokenizer st = new StringTokenizer(text);
-        StringBuilder stringBuilder = new StringBuilder();
-        boolean doppio = false;
-
-        while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-
-            if (token.length() >= 6 && !doppio) {
-                if (token.endsWith("a")) {
-                    stringBuilder.append("cosa");
-                    doppio = true;
-                } else if (token.endsWith("o")) {
-                    stringBuilder.append("coso");
-                    doppio = true;
-                } else if (token.endsWith("e")) {
-                    stringBuilder.append("cose");
-                    doppio = true;
-                } else if (token.endsWith("i")) {
-                    stringBuilder.append("cosi");
-                    doppio = true;
-                } else {
-                    stringBuilder.append(token);
-                    doppio = false;
-                }
-            } else {
-                stringBuilder.append(token);
-                doppio = false;
-            }
-
-            stringBuilder.append(" ");
-        }
-
-
-        return stringBuilder.toString();
-    }
-
 
     @Override
     public String getBotUsername() {

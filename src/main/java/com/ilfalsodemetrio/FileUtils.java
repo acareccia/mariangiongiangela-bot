@@ -1,15 +1,23 @@
 package com.ilfalsodemetrio;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Created by lbrtz on 08/09/16.
  */
-public class PersistUtils {
+public class FileUtils {
 
+    public static Properties loadResource(String res) {
+        final Properties properties = new Properties();
+        try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(res)) {
+            properties.load(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties;
+    }
     public static void persistObject(String filename,Object object) throws Exception {
         final FileOutputStream fo = new FileOutputStream(filename);
         final ObjectOutputStream oos = new ObjectOutputStream(fo);

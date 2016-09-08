@@ -1,21 +1,11 @@
 package com.ilfalsodemetrio;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.groupadministration.KickChatMember;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.io.*;
-import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -35,7 +25,7 @@ public abstract class Bot extends TelegramLongPollingBot {
     public Bot() {
         log("startup ...");
         log("load props ...");
-        Properties props = loadResource(getBotUsername()+".properties");
+        Properties props = FileUtils.loadResource(getBotUsername()+".properties");
 
         for(Map.Entry<Object, Object> p : props.entrySet()) {
             String key = (String) p.getKey();
@@ -49,7 +39,7 @@ public abstract class Bot extends TelegramLongPollingBot {
 
         log("load objects ...");
         try {
-            users = (Set<ChatUser>) PersistUtils.loadObject(getBotUsername()+".out");
+            users = (Set<ChatUser>) FileUtils.loadObject(getBotUsername()+".out");
         } catch (Exception e) {
             log("error :"+e);
         }
@@ -58,7 +48,7 @@ public abstract class Bot extends TelegramLongPollingBot {
     public void shutdown() {
         log("save objects ...");
         try {
-            PersistUtils.persistObject(getBotUsername()+".out",users);
+            FileUtils.persistObject(getBotUsername()+".out",users);
         } catch (Exception e) {
             log("error :"+e);
         }
@@ -90,7 +80,7 @@ public abstract class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        final Properties properties = loadResource(TELEGRAM_TOKENS);
+        final Properties properties = FileUtils.loadResource(TELEGRAM_TOKENS);
         String token_prop = properties.getProperty(getBotUsername());
         if (token_prop.startsWith("$"))
             return System.getenv(token_prop.substring(1));
@@ -113,16 +103,6 @@ public abstract class Bot extends TelegramLongPollingBot {
         return sendMsg(id.toString(),text);
     }
 
-    protected Properties loadResource(String res) {
-        final Properties properties = new Properties();
-        try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(res)) {
-            properties.load(stream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return properties;
-    }
-
     protected String notSoRandom(List list) {
         String r = list.get(new Random().nextInt(list.size())).toString();
 
@@ -133,7 +113,6 @@ public abstract class Bot extends TelegramLongPollingBot {
         //randomCache.put(list,r);
         return r;
     }
-
 
     protected boolean hasKeyword(String text, List<String>...liste) {
         text = text.toLowerCase().trim();
@@ -147,6 +126,24 @@ public abstract class Bot extends TelegramLongPollingBot {
             if (!found) return false;
         }
         return found;
+    }
+
+    protected String getKeyword(String text, List<String>...liste) {
+        text = text.toLowerCase().trim();
+        boolean found=false;
+        String argument = null;
+
+        for (List lista: liste) {
+            found=false;
+            for (Object s : lista) {
+                if (text.contains(s.toString())) {
+                    argument = text.substring(text.indexOf(s.toString())+s.toString().length());
+                    found = true;
+                }
+            }
+            if (!found) return null;
+        }
+        return argument;
     }
 
     protected boolean hasKeyword(String text, String[] array) {
@@ -164,11 +161,10 @@ public abstract class Bot extends TelegramLongPollingBot {
      * @return
      */
     protected String randomResponse(Message message, List<String> list,Collection<ChatUser> users) {
-        List<ChatUser> chatUsers = new ArrayList<ChatUser>(users);
-
         String rndUser = "Coso";
 
         if (users != null) {
+            List<ChatUser> chatUsers = new ArrayList<ChatUser>(users);
             rndUser = chatUsers.get(new Random().nextInt(users.size())).getUser().getFirstName();
         }
 
@@ -177,42 +173,9 @@ public abstract class Bot extends TelegramLongPollingBot {
         return fmtRes;
     }
 
-    /**
-     * Search wikipedia
-     *
-     * @param term
-     * @param lang
-     * @return
-     */
-    protected String searchWiki(String term, String lang) {
-        final String ENDPOINT = "https://"+lang+".wikipedia.org/w/api.php";
-        log("search :"+term);
-
-        String output = "";
-        CloseableHttpClient httpClient =
-                HttpClientBuilder.create().build();
-
-        try {
-            String param = URLEncoder.encode(term.trim().toLowerCase(), "utf-8");
-            HttpGet request = new HttpGet(ENDPOINT+"?action=opensearch&limit=1&search="+param);
-            request.addHeader("content-type", "application/x-www-form-urlencoded");
-            CloseableHttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-            BufferedHttpEntity buf = new BufferedHttpEntity(entity);
-            String responseText = EntityUtils.toString(buf);
-            JSONArray jsonArray = new JSONArray(responseText);
-            //fixme: empty array
-            output = jsonArray.getJSONArray(2).get(0).toString();
-            if (output.isEmpty())
-                return output;
-            log("search res:"+output);
-        }catch (Exception ex) {
-            log("wiki search error: "+ex);
-            ex.printStackTrace();
-        }
-        return output;
+    protected String randomResponse(Message message,List<String> list) {
+        return randomResponse(message,list,null);
     }
-
 
     /**
      * Kick
@@ -244,7 +207,7 @@ public abstract class Bot extends TelegramLongPollingBot {
         System.out.println(getBotUsername() + " - " + message);
     }
 
-    public Set<ChatUser> getUsers(Chat chat) {
+    protected Set<ChatUser> getUsers(Chat chat) {
         //fixme: filter
         return users;
     }
