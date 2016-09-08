@@ -1,5 +1,5 @@
 # MariangiongiangelaBot
-Dumb Customizable Telegram Bots
+Dumb Telegram Bots
 
 ## Contributions
 Feel free to fork this project
