@@ -1,6 +1,7 @@
 package com.ilfalsodemetrio.bots;
 
 import com.ilfalsodemetrio.Bot;
+import com.ilfalsodemetrio.DatabaseManager;
 import com.ilfalsodemetrio.dai.MariangelizeHandler;
 import com.ilfalsodemetrio.dai.WikipediaHandler;
 import org.telegram.telegrambots.api.objects.Message;
@@ -17,6 +18,7 @@ public class IlfalsodemetrioBot extends Bot {
 
     @Override
     public String botAI(Message message) {
+        String res = null;
 
         if (message.hasText()) {
             String text = message.getText();
@@ -28,17 +30,32 @@ public class IlfalsodemetrioBot extends Bot {
             if (text.startsWith(HELP_COMMAND))
                 return HELP_COMMAND_TEXT;
 
+
             // keywords
 
             if (hasKeyword(text,keywords.get("names"),keywords.get("find"))) {
-                return WikipediaHandler.process(getKeyword(text,keywords.get("find")),"en",randomResponse(message,responses.get("find")));
+                res = WikipediaHandler.process(getKeyword(text,keywords.get("find")),"en",randomResponse(message,responses.get("find")));
+            }
+
+            if (hasKeyword(text,keywords.get("names"),keywords.get("off"))) {
+                setMute(true);
+                return randomResponse(message,responses.get("off"));
+            }
+
+            if (hasKeyword(text,keywords.get("names"),keywords.get("on"))) {
+                setMute(false);
+                return  randomResponse(message,responses.get("on"));
             }
 
             if (hasKeyword(text,keywords.get("names")))
-                return randomResponse(message,responses.get("names"),getUsers(message.getChat()));
+                res = randomResponse(message,responses.get("names"),getUsers(message.getChat()));
 
+            // quiet
+            if (isMute()) {
+                return null;
+            }
         }
-        return null;
+        return res;
     }
 
     @Override

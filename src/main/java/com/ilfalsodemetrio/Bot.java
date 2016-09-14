@@ -19,6 +19,7 @@ public abstract class Bot extends TelegramLongPollingBot {
     private Set<ChatUser> users = new TreeSet<ChatUser>();
     protected Map<String,List<String>> keywords = new HashMap<>();
     protected Map<String,List<String>> responses = new HashMap<>();
+    private boolean mute = false;
 
     public abstract String botAI(Message message);
 
@@ -36,22 +37,29 @@ public abstract class Bot extends TelegramLongPollingBot {
             else if (key.endsWith("_responses"))
                 responses.put(key.split("_",2)[0],values);
         }
+        startup();
+    }
 
+    public void startup() {
         log("load objects ...");
         try {
             //users = (Set<ChatUser>) FileUtils.loadObject(getBotUsername()+".out");
             users = (Set<ChatUser>) DatabaseManager.readObject(getBotUsername()+".users");
+            mute = DatabaseManager.read(getBotUsername()+".quiet").equals("yes");
 
         } catch (Exception e) {
             log("error :"+e);
         }
+        log("users: "+users);
+        log("mute: "+mute);
     }
 
     public void shutdown() {
         log("save objects ...");
         try {
-            DatabaseManager.writeObject(getBotUsername()+".users",users);
             //FileUtils.persistObject(getBotUsername()+".out",users);
+            DatabaseManager.writeObject(getBotUsername()+".users",users);
+            DatabaseManager.write(getBotUsername()+".quiet","no");
         } catch (Exception e) {
             log("error :"+e);
         }
@@ -66,12 +74,7 @@ public abstract class Bot extends TelegramLongPollingBot {
             else
                 message = update.getEditedMessage();
 
-            if (message.getNewChatMember()!= null)
-                users.add(new ChatUser(message.getChat(),message.getNewChatMember()));
-            else if (message.getLeftChatMember() != null)
-                users.remove(new ChatUser(message.getChat(),message.getLeftChatMember()));
-             else
-                 users.add(new ChatUser(message.getChat(),message.getFrom()));
+            updateUsers(message);
 
             String response = botAI(message);
 
@@ -153,6 +156,15 @@ public abstract class Bot extends TelegramLongPollingBot {
         return hasKeyword(text,Arrays.asList(array));
     }
 
+    private void updateUsers(Message message) {
+        if (message.getNewChatMember()!= null)
+            users.add(new ChatUser(message.getChat(),message.getNewChatMember()));
+        else if (message.getLeftChatMember() != null)
+            users.remove(new ChatUser(message.getChat(),message.getLeftChatMember()));
+        else
+            users.add(new ChatUser(message.getChat(),message.getFrom()));
+    }
+
     // response Handlers
 
     /**
@@ -215,4 +227,11 @@ public abstract class Bot extends TelegramLongPollingBot {
         return users;
     }
 
+    public boolean isMute() {
+        return mute;
+    }
+
+    public void setMute(boolean mute) {
+        this.mute = mute;
+    }
 }

@@ -37,6 +37,29 @@ public class DatabaseManager {
         return pool;
     }
 
+    public static void write(String key, String value) {
+        Jedis jedis = null;
+        try {
+            jedis = getPool().getResource();
+            jedis.set(key,value);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    public static String read(String key) {
+        Jedis jedis = null;
+        try {
+            jedis = getPool().getResource();
+            return jedis.get(key);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
 
     public static void writeObject(String key, Object value) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
