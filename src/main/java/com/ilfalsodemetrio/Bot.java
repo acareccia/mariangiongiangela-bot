@@ -39,7 +39,9 @@ public abstract class Bot extends TelegramLongPollingBot {
 
         log("load objects ...");
         try {
-            users = (Set<ChatUser>) FileUtils.loadObject(getBotUsername()+".out");
+            //users = (Set<ChatUser>) FileUtils.loadObject(getBotUsername()+".out");
+            users = (Set<ChatUser>) DatabaseManager.readObject(getBotUsername()+".users");
+
         } catch (Exception e) {
             log("error :"+e);
         }
@@ -48,7 +50,8 @@ public abstract class Bot extends TelegramLongPollingBot {
     public void shutdown() {
         log("save objects ...");
         try {
-            FileUtils.persistObject(getBotUsername()+".out",users);
+            DatabaseManager.writeObject(getBotUsername()+".users",users);
+            //FileUtils.persistObject(getBotUsername()+".out",users);
         } catch (Exception e) {
             log("error :"+e);
         }
