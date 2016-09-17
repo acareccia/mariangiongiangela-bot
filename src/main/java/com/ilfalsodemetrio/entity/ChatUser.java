@@ -1,10 +1,8 @@
-package com.ilfalsodemetrio;
+package com.ilfalsodemetrio.entity;
 
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**

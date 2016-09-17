@@ -1,4 +1,4 @@
-package com.ilfalsodemetrio;
+package com.ilfalsodemetrio.utils;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

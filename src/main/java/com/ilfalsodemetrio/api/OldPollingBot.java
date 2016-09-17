@@ -1,5 +1,8 @@
-package com.ilfalsodemetrio;
+package com.ilfalsodemetrio.api;
 
+import com.ilfalsodemetrio.entity.ChatUser;
+import com.ilfalsodemetrio.utils.DatabaseManager;
+import com.ilfalsodemetrio.utils.FileUtils;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.groupadministration.KickChatMember;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -12,7 +15,7 @@ import java.util.*;
 /**
  * Created by lbrtz on 01/09/16.
  */
-public abstract class Bot extends TelegramLongPollingBot {
+public abstract class OldPollingBot extends HeadlessBot {
     private static String TELEGRAM_TOKENS = "tokens.properties";
 
     private Map randomCache = new HashMap();
@@ -23,7 +26,7 @@ public abstract class Bot extends TelegramLongPollingBot {
 
     public abstract String botAI(Message message);
 
-    public Bot() {
+    public OldPollingBot() {
         log("startup ...");
         log("load props ...");
         Properties props = FileUtils.loadResource(getBotUsername()+".properties");
@@ -66,6 +69,11 @@ public abstract class Bot extends TelegramLongPollingBot {
     }
 
     @Override
+    public String getBotUsername() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage() || update.hasEditedMessage()){
             Message message;
@@ -79,7 +87,7 @@ public abstract class Bot extends TelegramLongPollingBot {
             String response = botAI(message);
 
             if(response != null) {
-                sendMsg(message.getChatId(),response);
+                say(message.getChatId(),response);
             }
         }
     }
@@ -91,22 +99,6 @@ public abstract class Bot extends TelegramLongPollingBot {
         if (token_prop.startsWith("$"))
             return System.getenv(token_prop.substring(1));
         return token_prop;
-    }
-
-    public Message sendMsg(String id, String text) {
-        SendMessage sendMessageRequest = new SendMessage();
-        sendMessageRequest.setChatId(id);
-        sendMessageRequest.setText(text);
-        try {
-            return sendMessage(sendMessageRequest);
-        } catch (TelegramApiException e) {
-            log("TelegramApiException e:"+e.getMessage());
-        }
-        return null;
-    }
-
-    public Message sendMsg(Long id, String text) {
-        return sendMsg(id.toString(),text);
     }
 
     protected String notSoRandom(List list) {

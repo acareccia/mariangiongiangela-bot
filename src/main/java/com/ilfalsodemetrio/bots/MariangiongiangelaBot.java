@@ -1,17 +1,14 @@
 package com.ilfalsodemetrio.bots;
 
-import com.ilfalsodemetrio.Bot;
-import com.ilfalsodemetrio.DatabaseManager;
-import com.ilfalsodemetrio.dai.MariangelizeHandler;
-import com.ilfalsodemetrio.dai.WikipediaHandler;
+import com.ilfalsodemetrio.api.OldPollingBot;
+import com.ilfalsodemetrio.handlers.MariangelizeHandler;
+import com.ilfalsodemetrio.handlers.WikipediaHandler;
 import org.telegram.telegrambots.api.objects.Message;
-
-import java.util.*;
 
 /**
  * Created by lbrtz on 04/08/16.
  */
-public class MariangiongiangelaBot extends Bot {
+public class MariangiongiangelaBot extends OldPollingBot {
     private static String BOT_NAME = "mariangiongiangelaBot";
     private static String INFO_COMMAND = "/info";
     private static String HELP_COMMAND = "/aiuto";

@@ -1,7 +1,7 @@
 package com.ilfalsodemetrio;
 
+import com.ilfalsodemetrio.api.OldPollingBot;
 import com.ilfalsodemetrio.bots.IlfalsodemetrioBot;
-import com.ilfalsodemetrio.bots.MariangiongiangelaBot;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
 
@@ -11,34 +11,34 @@ import java.util.List;
 /**
  * Created by lbrtz on 01/09/16.
  */
-public class BotsStartup {
+public class Bootstrap {
     private TelegramBotsApi telegramBotsApi;
-    private List<Bot> botList = new ArrayList<>();
+    private List<OldPollingBot> botList = new ArrayList<>();
 
     public static void main(String[] args) {
-        System.out.println("BotsStartup ...");
+        System.out.println("Bootstrap ...");
 
-        BotsStartup botsStartup = new BotsStartup();
-        botsStartup.loadBot(new IlfalsodemetrioBot());
-        botsStartup.loadBot(new MariangiongiangelaBot());
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.loadBot(new IlfalsodemetrioBot());
+        //bootstrap.loadBot(new MariangiongiangelaBot());
 
-        System.out.println("BotsStartup Running...");
+        System.out.println("Bootstrap Running...");
     }
 
-    public BotsStartup() {
+    public Bootstrap() {
         telegramBotsApi = new TelegramBotsApi();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                System.out.println("BotsStartup Shutdown ...");
-                for (Bot b : botList) {
+                System.out.println("Bootstrap Shutdown ...");
+                for (OldPollingBot b : botList) {
                     b.shutdown();
                 }
             }
         });
     }
 
-    public void loadBot(Bot bot) {
+    public void loadBot(OldPollingBot bot) {
         try {
             if (bot.getBotToken() != null) {
                 telegramBotsApi.registerBot(bot);

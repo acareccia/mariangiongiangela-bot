@@ -1,4 +1,4 @@
-package com.ilfalsodemetrio;
+package com.ilfalsodemetrio.utils;
 
 import java.io.*;
 import java.util.Properties;
