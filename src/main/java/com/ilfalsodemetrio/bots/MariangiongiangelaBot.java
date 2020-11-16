@@ -3,13 +3,14 @@ package com.ilfalsodemetrio.bots;
 import com.ilfalsodemetrio.api.OldPollingBot;
 import com.ilfalsodemetrio.handlers.MariangelizeHandler;
 import com.ilfalsodemetrio.handlers.WikipediaHandler;
-import org.telegram.telegrambots.api.objects.Message;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 /**
  * Created by lbrtz on 04/08/16.
  */
+@Component
 public class MariangiongiangelaBot extends OldPollingBot {
-    private static String BOT_NAME = "mariangiongiangelaBot";
     private static String INFO_COMMAND = "/info";
     private static String HELP_COMMAND = "/aiuto";
     private static String HELP_COMMAND_TEXT = "*TODO*";
@@ -63,10 +64,4 @@ public class MariangiongiangelaBot extends OldPollingBot {
 
         return res;
     }
-
-    @Override
-    public String getBotUsername() {
-        return BOT_NAME;
-    }
-
 }

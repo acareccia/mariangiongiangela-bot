@@ -1,7 +1,8 @@
 package com.ilfalsodemetrio.entity;
 
-import org.telegram.telegrambots.api.objects.Chat;
-import org.telegram.telegrambots.api.objects.User;
+
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.io.Serializable;
 

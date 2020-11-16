@@ -1,13 +1,13 @@
 package com.ilfalsodemetrio.api;
 
 import com.ilfalsodemetrio.entity.ChatUser;
-import com.ilfalsodemetrio.utils.DatabaseManager;
 import com.ilfalsodemetrio.utils.FileUtils;
-import org.telegram.telegrambots.TelegramApiException;
-import org.telegram.telegrambots.api.methods.groupadministration.KickChatMember;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.*;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.KickChatMember;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -16,7 +16,7 @@ import java.util.*;
  * Created by lbrtz on 01/09/16.
  */
 public abstract class OldPollingBot extends HeadlessBot {
-    private static String TELEGRAM_TOKENS = "tokens.properties";
+    private static final Logger log = LoggerFactory.getLogger(OldPollingBot.class);
 
     private Map randomCache = new HashMap();
     private Set<ChatUser> users = new TreeSet<ChatUser>();
@@ -27,8 +27,6 @@ public abstract class OldPollingBot extends HeadlessBot {
     public abstract String botAI(Message message);
 
     public OldPollingBot() {
-        log("startup ...");
-        log("load props ...");
         Properties props = FileUtils.loadResource(getBotUsername()+".properties");
 
         for(Map.Entry<Object, Object> p : props.entrySet()) {
@@ -40,66 +38,33 @@ public abstract class OldPollingBot extends HeadlessBot {
             else if (key.endsWith("_responses"))
                 responses.put(key.split("_",2)[0],values);
         }
-        startup();
+//        startup();
     }
 
-    public void startup() {
-        log("load objects ...");
-        try {
-            //users = (Set<ChatUser>) FileUtils.loadObject(getBotUsername()+".out");
-            users = (Set<ChatUser>) DatabaseManager.readObject(getBotUsername()+".users");
-            mute = DatabaseManager.read(getBotUsername()+".quiet").equals("yes");
+//    public void startup() {
+//        log("load objects ...");
+//        try {
+//            //users = (Set<ChatUser>) FileUtils.loadObject(getBotUsername()+".out");
+//            users = (Set<ChatUser>) DatabaseManager.readObject(getBotUsername()+".users");
+//            mute = DatabaseManager.read(getBotUsername()+".quiet").equals("yes");
+//
+//        } catch (Exception e) {
+//            log("error :"+e);
+//        }
+//        log("users: "+users);
+//        log("mute: "+mute);
+//    }
 
-        } catch (Exception e) {
-            log("error :"+e);
-        }
-        log("users: "+users);
-        log("mute: "+mute);
-    }
-
-    public void shutdown() {
-        log("save objects ...");
-        try {
-            //FileUtils.persistObject(getBotUsername()+".out",users);
-            DatabaseManager.writeObject(getBotUsername()+".users",users);
-            DatabaseManager.write(getBotUsername()+".quiet","no");
-        } catch (Exception e) {
-            log("error :"+e);
-        }
-    }
-
-    @Override
-    public String getBotUsername() {
-        return this.getClass().getSimpleName();
-    }
-
-    @Override
-    public void onUpdateReceived(Update update) {
-        if(update.hasMessage() || update.hasEditedMessage()){
-            Message message;
-            if (update.hasMessage())
-                message = update.getMessage();
-            else
-                message = update.getEditedMessage();
-
-            updateUsers(message);
-
-            String response = botAI(message);
-
-            if(response != null) {
-                say(message.getChatId(),response);
-            }
-        }
-    }
-
-    @Override
-    public String getBotToken() {
-        final Properties properties = FileUtils.loadResource(TELEGRAM_TOKENS);
-        String token_prop = properties.getProperty(getBotUsername());
-        if (token_prop.startsWith("$"))
-            return System.getenv(token_prop.substring(1));
-        return token_prop;
-    }
+//    public void shutdown() {
+//        log("save objects ...");
+//        try {
+//            //FileUtils.persistObject(getBotUsername()+".out",users);
+//            DatabaseManager.writeObject(getBotUsername()+".users",users);
+//            DatabaseManager.write(getBotUsername()+".quiet","no");
+//        } catch (Exception e) {
+//            log("error :"+e);
+//        }
+//    }
 
     protected String notSoRandom(List list) {
         String r = list.get(new Random().nextInt(list.size())).toString();
@@ -148,14 +113,6 @@ public abstract class OldPollingBot extends HeadlessBot {
         return hasKeyword(text,Arrays.asList(array));
     }
 
-    private void updateUsers(Message message) {
-        if (message.getNewChatMember()!= null)
-            users.add(new ChatUser(message.getChat(),message.getNewChatMember()));
-        else if (message.getLeftChatMember() != null)
-            users.remove(new ChatUser(message.getChat(),message.getLeftChatMember()));
-        else
-            users.add(new ChatUser(message.getChat(),message.getFrom()));
-    }
 
     // response Handlers
 
@@ -170,7 +127,7 @@ public abstract class OldPollingBot extends HeadlessBot {
     protected String randomResponse(Message message, List<String> list,Collection<ChatUser> users) {
         String rndUser = "Coso";
 
-        if (users != null) {
+        if (users != null && users.size() >0)  {
             List<ChatUser> chatUsers = new ArrayList<ChatUser>(users);
             rndUser = chatUsers.get(new Random().nextInt(users.size())).getUser().getFirstName();
         }
@@ -196,22 +153,13 @@ public abstract class OldPollingBot extends HeadlessBot {
         kickChatMember.setChatId(message.getChatId().toString());
         kickChatMember.setUserId(message.getFrom().getId());
 
-        try {
-            this.kickMember(kickChatMember);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+//        try {
+            this.kick(message,"bye");
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
 
         return text;
-    }
-
-    /**
-     * Simple logger
-     *
-     * @param message
-     */
-    protected void log(String message) {
-        System.out.println(getBotUsername() + " - " + message);
     }
 
     protected Set<ChatUser> getUsers(Chat chat) {

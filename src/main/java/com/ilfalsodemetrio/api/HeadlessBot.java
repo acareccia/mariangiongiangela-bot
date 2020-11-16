@@ -1,17 +1,23 @@
 package com.ilfalsodemetrio.api;
 
+import com.ilfalsodemetrio.entity.ChatUser;
 import com.ilfalsodemetrio.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.telegram.telegrambots.TelegramApiException;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.Message;
-import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created by lbrtz on 15/09/16.
@@ -19,6 +25,12 @@ import java.util.Properties;
 @RestController
 public abstract class HeadlessBot extends TelegramLongPollingBot {
     private static final Logger log = LoggerFactory.getLogger(HeadlessBot.class);
+
+    @Autowired
+    private Environment env;
+
+    private Set<ChatUser> users = new TreeSet<ChatUser>();
+
 
 //    public HeadlessBot() {
 //        log.info("load props "+ getBotUsername());
@@ -29,10 +41,13 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if(update.hasMessage() || update.hasEditedMessage()){
             Message message;
-            if (update.hasMessage())
+            if (update.hasMessage()) {
                 message = update.getMessage();
-            else
+            } else {
                 message = update.getEditedMessage();
+            }
+
+            updateUsers(message);
 
             String response = botAI(message);
 
@@ -49,7 +64,9 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return System.getenv(getBotUsername().toUpperCase()+"_TOKEN");
+        log.debug("get token: " + env.getProperty(getBotUsername()+".token"));
+        return env.getProperty(getBotUsername()+".token");
+        //return System.getenv(getBotUsername().toUpperCase()+"_TOKEN");
     }
 
     public Message say(String id, String text) {
@@ -57,7 +74,7 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
         sendMessageRequest.setChatId(id);
         sendMessageRequest.setText(text);
         try {
-            return sendMessage(sendMessageRequest);
+            return sendApiMethod(sendMessageRequest);
         } catch (TelegramApiException e) {
             log.error("TelegramApiException e:"+e.getMessage());
         }
@@ -76,12 +93,20 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
         sayToAll("addio mondo crudele");
     }
 
+    protected Set<ChatUser> getUsers(Chat chat) {
+        //fixme: filter
+        return users;
+    }
 
-    @RequestMapping("/")
-    public String test() {
-        return "hello from" +getBotUsername();
+    private void updateUsers(Message message) {
+        if (message.getNewChatMembers()!= null && message.getNewChatMembers().size() > 0) {
+            users.add(new ChatUser(message.getChat(), message.getNewChatMembers().get(0)));
+        } else if (message.getLeftChatMember() != null) {
+            users.remove(new ChatUser(message.getChat(), message.getLeftChatMember()));
+        } else {
+            users.add(new ChatUser(message.getChat(), message.getFrom()));
+        }
     }
 
     public abstract String botAI(Message message);
-
 }

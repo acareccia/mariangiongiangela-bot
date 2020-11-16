@@ -1,6 +1,7 @@
 package com.ilfalsodemetrio;
 
 import com.ilfalsodemetrio.bots.GioforchioBot;
+import com.ilfalsodemetrio.bots.MariangiongiangelaBot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +9,10 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.telegram.telegrambots.TelegramApiException;
-import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.updatesreceivers.BotSession;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.BotSession;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
@@ -23,32 +25,34 @@ import java.util.List;
 public class BotApplication implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(BotApplication.class);
 
-    private TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
-    private List<BotSession> botSessions = new ArrayList<>();
+    private final List<BotSession> bots = new ArrayList<>();
 
     @Autowired
     private GioforchioBot gioforchioBot;
 
+    @Autowired
+    private MariangiongiangelaBot mariangiongiangelaBot;
 
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception {
+        TelegramBotsApi telegramBotsApi;
+
         log.info("start");
 
         try {
-            botSessions.add(telegramBotsApi.registerBot(gioforchioBot));
+            telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            bots.add(telegramBotsApi.registerBot(gioforchioBot));
+            bots.add(telegramBotsApi.registerBot(mariangiongiangelaBot));
         } catch (TelegramApiException e) {
-            log.error("Failed to register bot {} due to error {}: {}", gioforchioBot.getBotUsername(), e.getMessage(), e.getApiResponse());
+            log.error("Failed to register bot {} ", e.getMessage());
         }
-
     }
 
     @PreDestroy
     public void stop() {
-        gioforchioBot.kill();
-
-        if (botSessions != null) {
-            for (BotSession botSession : botSessions) {
-                botSession.close();
+        if (bots != null) {
+            for (BotSession botSession : bots) {
+                botSession.stop();
             }
         }
     }
