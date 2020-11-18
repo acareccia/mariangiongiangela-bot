@@ -1,4 +1,4 @@
 GioforchioBot:
-  token:
+  token: $GIOFORCHIO_BOT_TOKEN
 MariangiongiangelaBot:
-  token:
+  token: $MARIANGIONGIANGELA_BOT_TOKEN

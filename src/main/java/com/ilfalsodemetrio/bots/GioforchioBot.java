@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
  */
 @Component
 public class GioforchioBot extends HeadlessBot {
-    private static String INFO_COMMAND = "/info";
+
 
     @Override
     public String botAI(Message message) {
@@ -18,9 +18,8 @@ public class GioforchioBot extends HeadlessBot {
         if (message.hasText()) {
             String text = message.getText();
 
-            // commands
-            if (text.startsWith(INFO_COMMAND))
-                return getBotUsername() + " is live with " + getUsers(message.getChat());
+            if (text.toLowerCase().startsWith("ciao"))
+                return "Ciao"+ message.getSenderChat().getFirstName();
         }
 
         return res;
