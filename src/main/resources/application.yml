@@ -1,4 +1,4 @@
-GioforchioBot:
-  token: $GIOFORCHIO_BOT_TOKEN
-MariangiongiangelaBot:
-  token: $MARIANGIONGIANGELA_BOT_TOKEN
+logging:
+  level:
+    root: info
+    com.ilfalsodemetrio: debug

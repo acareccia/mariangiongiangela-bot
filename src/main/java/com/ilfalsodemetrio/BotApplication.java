@@ -34,15 +34,12 @@ public class BotApplication implements ApplicationRunner {
     private MariangiongiangelaBot mariangiongiangelaBot;
 
     @Override
-    public void run(ApplicationArguments applicationArguments) throws Exception {
-        TelegramBotsApi telegramBotsApi;
-
-        log.info("start");
-
+    public void run(ApplicationArguments applicationArguments) {
         try {
-            telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            bots.add(telegramBotsApi.registerBot(gioforchioBot));
-            bots.add(telegramBotsApi.registerBot(mariangiongiangelaBot));
+            log.info("register {}",gioforchioBot.getBotUsername());
+            bots.add(new TelegramBotsApi(DefaultBotSession.class).registerBot(gioforchioBot));
+            log.info("register {}",mariangiongiangelaBot.getBotUsername());
+            bots.add(new TelegramBotsApi(DefaultBotSession.class).registerBot(mariangiongiangelaBot));
         } catch (TelegramApiException e) {
             log.error("Failed to register bot {} ", e.getMessage());
         }
@@ -50,10 +47,9 @@ public class BotApplication implements ApplicationRunner {
 
     @PreDestroy
     public void stop() {
-        if (bots != null) {
-            for (BotSession botSession : bots) {
-                botSession.stop();
-            }
+        for (BotSession botSession : bots) {
+            log.info("stop {} ",botSession);
+            botSession.stop();
         }
     }
 

@@ -1,5 +1,6 @@
 package com.ilfalsodemetrio.api;
 
+import com.google.common.base.CaseFormat;
 import com.ilfalsodemetrio.entity.ChatUser;
 import com.ilfalsodemetrio.utils.FileUtils;
 import org.slf4j.Logger;
@@ -15,7 +16,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -31,14 +31,9 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
 
     private Set<ChatUser> users = new TreeSet<ChatUser>();
 
-
-//    public HeadlessBot() {
-//        log.info("load props "+ getBotUsername());
-//        Properties props = FileUtils.loadResource(getBotUsername()+".properties");
-//    }
-
     @Override
     public void onUpdateReceived(Update update) {
+        log.debug("update {}", getBotUsername());
         if(update.hasMessage() || update.hasEditedMessage()){
             Message message;
             if (update.hasMessage()) {
@@ -64,9 +59,9 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        log.debug("get token: " + env.getProperty(getBotUsername()+".token"));
-        return env.getProperty(getBotUsername()+".token");
-        //return System.getenv(getBotUsername().toUpperCase()+"_TOKEN");
+        String var = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getBotUsername())+ "_TOKEN";
+        //log.info("get token: {}",var);
+        return env.getProperty(var);
     }
 
     public Message say(String id, String text) {
@@ -94,7 +89,6 @@ public abstract class HeadlessBot extends TelegramLongPollingBot {
     }
 
     protected Set<ChatUser> getUsers(Chat chat) {
-        //fixme: filter
         return users;
     }
 

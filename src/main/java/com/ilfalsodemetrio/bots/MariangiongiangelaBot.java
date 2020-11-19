@@ -23,22 +23,23 @@ public class MariangiongiangelaBot extends OldPollingBot {
             String text = message.getText();
 
             // commands
-            if (text.startsWith(INFO_COMMAND))
-                return getBotUsername()+" is live with "+getUsers(message.getChat());
+            if (text.startsWith(INFO_COMMAND)) {
+                return getBotUsername() + " is live with " + getUsers(message.getChat());
+            }
 
-            if (text.startsWith(HELP_COMMAND))
+            if (text.startsWith(HELP_COMMAND)) {
                 return HELP_COMMAND_TEXT;
-
+            }
 
             // keywords
 
             if (hasKeyword(text,keywords.get("names"),keywords.get("wiki"))) {
                 String term = message.getText().split(" ",3)[2];
-                res = MariangelizeHandler.process(WikipediaHandler.process(term,"it",randomResponse(message,responses.get("wiki"))));
+                return MariangelizeHandler.process(WikipediaHandler.process(term,randomResponse(message,responses.get("wiki"))));
             }
 
             if (hasKeyword(text, keywords.get("names"),keywords.get("kicks")))
-                res = kick(message,randomResponse(message,responses.get("kicks"),null));
+                return kick(message,randomResponse(message,responses.get("kicks"),null));
 
             if (hasKeyword(text,keywords.get("names"),keywords.get("off"))) {
                 setMute(true);
@@ -51,10 +52,10 @@ public class MariangiongiangelaBot extends OldPollingBot {
             }
 
             if (hasKeyword(text,keywords.get("greetings")))
-                res = randomResponse(message,responses.get("greetings"),getUsers(message.getChat()));
+                return randomResponse(message,responses.get("greetings"),getUsers(message.getChat()));
 
             if (hasKeyword(text,keywords.get("names")))
-                res =  randomResponse(message,responses.get("names"),getUsers(message.getChat()));
+                return  randomResponse(message,responses.get("names"),getUsers(message.getChat()));
 
             // quiet
             if (isMute()) {

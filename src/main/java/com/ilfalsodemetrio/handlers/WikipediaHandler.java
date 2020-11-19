@@ -3,46 +3,39 @@ package com.ilfalsodemetrio.handlers;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.InputStreamReader;
 import java.net.URLEncoder;
 
 /**
  * Created by lbrtz on 08/09/16.
  */
 public class WikipediaHandler {
-    /**
-     * Search wikipedia
-     *
-     * @param term
-     * @param lang
-     * @return
-     */
-    public static String process(String term, String lang, String nothing) {
-        final String ENDPOINT = "https://"+lang+".wikipedia.org/w/api.php";
+    private static final String BASE_URL="https://it.wikipedia.org/api/rest_v1/page/summary/";
 
+    public static String process(String term, String nothing) {
         String output = nothing;
-        CloseableHttpClient httpClient =
-                HttpClientBuilder.create().build();
 
         try {
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
             String param = URLEncoder.encode(term.trim().toLowerCase(), "utf-8");
-            HttpGet request = new HttpGet(ENDPOINT+"?action=opensearch&limit=2&search="+param);
-            request.addHeader("content-type", "application/x-www-form-urlencoded");
+            HttpGet request = new HttpGet(BASE_URL + param);
             CloseableHttpResponse response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
-            BufferedHttpEntity buf = new BufferedHttpEntity(entity);
-            String responseText = EntityUtils.toString(buf);
-            JSONArray jsonArray = new JSONArray(responseText);
-            if (jsonArray != null && jsonArray.getJSONArray(2) != null && jsonArray.getJSONArray(2).length() > 0) {
-                output = jsonArray.getJSONArray(2).get(0).toString();
-            }
-        }catch (Exception ex) {
-            ex.printStackTrace();
+
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(new InputStreamReader(entity.getContent()));
+
+            output = (String)jsonObject.get("extract");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return output;
     }

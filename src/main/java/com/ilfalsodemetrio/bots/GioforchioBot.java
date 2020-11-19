@@ -19,7 +19,7 @@ public class GioforchioBot extends HeadlessBot {
             String text = message.getText();
 
             if (text.toLowerCase().startsWith("ciao"))
-                return "Ciao"+ message.getSenderChat().getFirstName();
+                res = "Ciao "+ message.getFrom().getFirstName();
         }
 
         return res;

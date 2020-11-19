@@ -154,7 +154,7 @@ public abstract class OldPollingBot extends HeadlessBot {
         kickChatMember.setUserId(message.getFrom().getId());
 
 //        try {
-            this.kick(message,"bye");
+//            this.kick(message,"bye");
 //        } catch (TelegramApiException e) {
 //            e.printStackTrace();
 //        }
