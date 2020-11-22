@@ -36,8 +36,8 @@ public class BotApplication implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments applicationArguments) {
         try {
-            log.info("register {}",gioforchioBot.getBotUsername());
-            bots.add(new TelegramBotsApi(DefaultBotSession.class).registerBot(gioforchioBot));
+            //log.info("register {}",gioforchioBot.getBotUsername());
+            //bots.add(new TelegramBotsApi(DefaultBotSession.class).registerBot(gioforchioBot));
             log.info("register {}",mariangiongiangelaBot.getBotUsername());
             bots.add(new TelegramBotsApi(DefaultBotSession.class).registerBot(mariangiongiangelaBot));
         } catch (TelegramApiException e) {
