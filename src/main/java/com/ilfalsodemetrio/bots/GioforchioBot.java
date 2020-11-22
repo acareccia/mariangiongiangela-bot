@@ -1,28 +1,21 @@
 package com.ilfalsodemetrio.bots;
 
-import com.ilfalsodemetrio.api.HeadlessBot;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Message;
 
-/**
- * Created by lbrtz on 15/09/16.
- */
-@Component
-public class GioforchioBot extends HeadlessBot {
+import com.ilfalsodemetrio.api.v2.Bot;
+import com.ilfalsodemetrio.api.v2.beans.Message;
 
+public class GioforchioBot implements Bot {
 
-    @Override
-    public String botAI(Message message) {
+    public Message ai(Message in) {
         String res = null;
 
-        if (message.hasText()) {
-            String text = message.getText();
+        if (in.hasText()) {
+            String text = in.getText();
 
             if (text.toLowerCase().startsWith("ciao"))
-                res = "Ciao "+ message.getFrom().getFirstName();
+                res = "Ciao "+ in.getFrom().getName();
         }
 
-        return res;
+        return new Message(res, in.getFrom(), in.getTo());
     }
-
 }
