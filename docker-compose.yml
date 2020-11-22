@@ -1,0 +1,6 @@
+version: "3"
+services:
+  bot:
+    environment:
+      - "MARIANGIONGIANGELA_BOT_TOKEN=$MARIANGIONGIANGELA_BOT_TOKEN"
+    image: com.ilfalsodemetrio/mariangiongiangela/mariangiongiangela:0.0.1
