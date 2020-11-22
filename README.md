@@ -2,7 +2,7 @@
 Dumb Telegram Bot
 
 ## Telegram Bot API
-This bots are using [Telegram bot API](https://core.telegram.org/bots)
+Using [Telegram bot API](https://core.telegram.org/bots)
 
 ## Build && Run
 
